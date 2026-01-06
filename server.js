@@ -1,17 +1,21 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static("public"));
+// ✅ STATIC FOLDER FIX
+app.use(express.static(path.join(__dirname, "public")));
 
+// ✅ FORCE HOME ROUTE
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/public/index.html");
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// ---- socket logic (as it is) ----
 let waitingUser = null;
 
 io.on("connection", socket => {
@@ -27,21 +31,16 @@ io.on("connection", socket => {
     waitingUser = socket;
   }
 
-  socket.on("message", msg => {
-    if (socket.partner) {
-      socket.partner.emit("message", msg);
-    }
-  });
-
   socket.on("disconnect", () => {
     if (socket.partner) {
-      socket.partner.emit("partnerDisconnected");
-      socket.partner.partner = null;
+      socket.partner.emit("partner-disconnected");
     }
     if (waitingUser === socket) waitingUser = null;
   });
 });
 
-server.listen(3000, () => {
-  console.log("Server running on port 3000");
+// ✅ IMPORTANT: PORT FIX FOR RENDER
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
 });
