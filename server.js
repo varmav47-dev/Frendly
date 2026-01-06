@@ -1,46 +1,50 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// ✅ STATIC FOLDER FIX
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static("public"));
 
-// ✅ FORCE HOME ROUTE
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-// ---- socket logic (as it is) ----
 let waitingUser = null;
 
-io.on("connection", socket => {
-  if (waitingUser) {
-    socket.partner = waitingUser;
-    waitingUser.partner = socket;
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
 
-    socket.emit("connected");
-    waitingUser.emit("connected");
+  if (waitingUser) {
+    // pair found
+    const room = `room-${waitingUser.id}-${socket.id}`;
+
+    socket.join(room);
+    waitingUser.join(room);
+
+    io.to(room).emit("matched");
 
     waitingUser = null;
   } else {
     waitingUser = socket;
   }
 
+  socket.on("message", (msg) => {
+    const rooms = [...socket.rooms];
+    rooms.forEach((room) => {
+      if (room !== socket.id) {
+        socket.to(room).emit("message", msg);
+      }
+    });
+  });
+
   socket.on("disconnect", () => {
-    if (socket.partner) {
-      socket.partner.emit("partner-disconnected");
+    if (waitingUser?.id === socket.id) {
+      waitingUser = null;
     }
-    if (waitingUser === socket) waitingUser = null;
+    console.log("User disconnected:", socket.id);
   });
 });
 
-// ✅ IMPORTANT: PORT FIX FOR RENDER
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
-});
+server.listen(PORT, () =>
+  console.log("Server running on port", PORT)
+);
