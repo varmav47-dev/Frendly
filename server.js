@@ -14,6 +14,7 @@ io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
   if (waitingUser) {
+    // match found
     socket.partner = waitingUser;
     waitingUser.partner = socket;
 
@@ -22,6 +23,7 @@ io.on("connection", (socket) => {
 
     waitingUser = null;
   } else {
+    // wait
     waitingUser = socket;
     socket.emit("waiting");
   }
@@ -40,10 +42,11 @@ io.on("connection", (socket) => {
     if (waitingUser === socket) {
       waitingUser = null;
     }
+    console.log("User disconnected:", socket.id);
   });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 server.listen(PORT, () => {
   console.log("Server running on port", PORT);
 });
