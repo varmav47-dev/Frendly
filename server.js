@@ -13,6 +13,7 @@ let waitingUser = null;
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
+  // Pair users
   if (waitingUser) {
     socket.partner = waitingUser;
     waitingUser.partner = socket;
@@ -23,30 +24,36 @@ io.on("connection", (socket) => {
     waitingUser = null;
   } else {
     waitingUser = socket;
+    socket.emit("waiting");
   }
 
+  // Messages
   socket.on("message", (msg) => {
     if (socket.partner) {
       socket.partner.emit("message", msg);
     }
   });
 
+  // NEXT button logic
   socket.on("next", () => {
     if (socket.partner) {
       socket.partner.partner = null;
       socket.partner.emit("disconnected");
     }
     socket.partner = null;
-    waitingUser = socket;
+
+    // put this user back in waiting
+    if (!waitingUser) {
+      waitingUser = socket;
+      socket.emit("waiting");
+    }
   });
 
   socket.on("disconnect", () => {
-    if (socket === waitingUser) {
-      waitingUser = null;
-    }
+    if (waitingUser === socket) waitingUser = null;
     if (socket.partner) {
-      socket.partner.emit("disconnected");
       socket.partner.partner = null;
+      socket.partner.emit("disconnected");
     }
   });
 });
