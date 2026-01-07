@@ -27,14 +27,14 @@ io.on("connection", (socket) => {
     socket.emit("waiting");
   }
 
-  // Messages
+  // Message handling
   socket.on("message", (msg) => {
     if (socket.partner) {
       socket.partner.emit("message", msg);
     }
   });
 
-  // NEXT button logic
+  // NEXT button
   socket.on("next", () => {
     if (socket.partner) {
       socket.partner.partner = null;
@@ -42,7 +42,6 @@ io.on("connection", (socket) => {
     }
     socket.partner = null;
 
-    // put this user back in waiting
     if (!waitingUser) {
       waitingUser = socket;
       socket.emit("waiting");
@@ -58,6 +57,7 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(process.env.PORT || 10000, () => {
-  console.log("Server running");
+const PORT = process.env.PORT || 10000;
+server.listen(PORT, () => {
+  console.log("Server running on port", PORT);
 });
