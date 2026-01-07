@@ -11,6 +11,7 @@
 
   <div id="online">Online users: 0</div>
   <div id="status">Connecting...</div>
+  <div id="typing"></div>
 
   <div id="chat"></div>
 
@@ -29,6 +30,7 @@
     const sendBtn = document.getElementById("sendBtn");
     const nextBtn = document.getElementById("nextBtn");
     const onlineDiv = document.getElementById("online");
+    const typingDiv = document.getElementById("typing");
 
     socket.on("online-count", (count) => {
       onlineDiv.innerText = "Online users: " + count;
@@ -36,23 +38,42 @@
 
     socket.on("waiting", () => {
       status.innerText = "Looking for stranger...";
+      typingDiv.innerText = "";
       chat.innerHTML = "";
     });
 
     socket.on("matched", () => {
       status.innerText = "Connected to stranger";
+      typingDiv.innerText = "";
       chat.innerHTML = "";
     });
 
     socket.on("message", (msg) => {
+      typingDiv.innerText = "";
       const div = document.createElement("div");
       div.innerText = "Stranger: " + msg;
       chat.appendChild(div);
     });
 
+    socket.on("typing", () => {
+      typingDiv.innerText = "Stranger is typing...";
+    });
+
+    socket.on("stop-typing", () => {
+      typingDiv.innerText = "";
+    });
+
     socket.on("disconnected", () => {
       status.innerText = "Stranger disconnected";
+      typingDiv.innerText = "";
     });
+
+    msgInput.oninput = () => {
+      socket.emit("typing");
+      setTimeout(() => {
+        socket.emit("stop-typing");
+      }, 800);
+    };
 
     sendBtn.onclick = () => {
       if (msgInput.value.trim() !== "") {
@@ -62,6 +83,7 @@
 
         socket.emit("message", msgInput.value);
         msgInput.value = "";
+        socket.emit("stop-typing");
       }
     };
 
@@ -71,4 +93,4 @@
   </script>
 
 </body>
-    </html>
+</html>
