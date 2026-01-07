@@ -14,7 +14,6 @@ let onlineUsers = 0;
 io.on("connection", (socket) => {
   onlineUsers++;
   io.emit("online-count", onlineUsers);
-  console.log("User connected:", socket.id, "Online:", onlineUsers);
 
   // Pair users
   if (waitingUser) {
@@ -30,10 +29,23 @@ io.on("connection", (socket) => {
     socket.emit("waiting");
   }
 
-  // Message handling
+  // Messages
   socket.on("message", (msg) => {
     if (socket.partner) {
       socket.partner.emit("message", msg);
+    }
+  });
+
+  // Typing indicator
+  socket.on("typing", () => {
+    if (socket.partner) {
+      socket.partner.emit("typing");
+    }
+  });
+
+  socket.on("stop-typing", () => {
+    if (socket.partner) {
+      socket.partner.emit("stop-typing");
     }
   });
 
@@ -54,7 +66,6 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     onlineUsers--;
     io.emit("online-count", onlineUsers);
-    console.log("User disconnected:", socket.id, "Online:", onlineUsers);
 
     if (waitingUser === socket) waitingUser = null;
     if (socket.partner) {
@@ -64,7 +75,6 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 10000;
-server.listen(PORT, () => {
-  console.log("Server running on port", PORT);
+server.listen(process.env.PORT || 10000, () => {
+  console.log("Server running");
 });
