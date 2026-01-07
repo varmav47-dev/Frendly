@@ -8,6 +8,8 @@
 <body>
 
   <h2>Friendly Chat 💬</h2>
+
+  <div id="online">Online users: 0</div>
   <div id="status">Connecting...</div>
 
   <div id="chat"></div>
@@ -26,6 +28,11 @@
     const msgInput = document.getElementById("msg");
     const sendBtn = document.getElementById("sendBtn");
     const nextBtn = document.getElementById("nextBtn");
+    const onlineDiv = document.getElementById("online");
+
+    socket.on("online-count", (count) => {
+      onlineDiv.innerText = "Online users: " + count;
+    });
 
     socket.on("waiting", () => {
       status.innerText = "Looking for stranger...";
@@ -64,4 +71,4 @@
   </script>
 
 </body>
-</html>
+    </html>
