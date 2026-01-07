@@ -9,9 +9,12 @@ const io = new Server(server);
 app.use(express.static("public"));
 
 let waitingUser = null;
+let onlineUsers = 0;
 
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
+  onlineUsers++;
+  io.emit("online-count", onlineUsers);
+  console.log("User connected:", socket.id, "Online:", onlineUsers);
 
   // Pair users
   if (waitingUser) {
@@ -49,6 +52,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
+    onlineUsers--;
+    io.emit("online-count", onlineUsers);
+    console.log("User disconnected:", socket.id, "Online:", onlineUsers);
+
     if (waitingUser === socket) waitingUser = null;
     if (socket.partner) {
       socket.partner.partner = null;
