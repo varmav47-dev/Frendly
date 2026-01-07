@@ -1,75 +1,40 @@
 body {
   background: #0f0f0f;
   color: white;
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   text-align: center;
-  padding: 10px;
-  margin: 0;
-}
-
-h2 {
-  margin-bottom: 5px;
-}
-
-#online {
-  font-size: 14px;
-  color: #aaa;
-}
-
-#status {
-  margin: 5px 0;
-}
-
-#typing {
-  font-size: 13px;
-  color: #bbb;
-  height: 18px;
 }
 
 #chat {
   height: 320px;
   background: #1c1c1c;
-  margin: 10px 0;
   padding: 10px;
   overflow-y: auto;
-  border-radius: 8px;
   display: flex;
   flex-direction: column;
+  border-radius: 8px;
 }
 
 .msg {
   max-width: 75%;
   padding: 8px 12px;
-  margin: 5px 0;
+  margin: 5px;
   border-radius: 15px;
-  font-size: 14px;
-  word-wrap: break-word;
 }
 
 .me {
   align-self: flex-end;
   background: #4caf50;
   color: black;
-  border-bottom-right-radius: 3px;
 }
 
 .stranger {
   align-self: flex-start;
   background: #333;
-  color: white;
-  border-bottom-left-radius: 3px;
 }
 
-input {
-  width: 65%;
-  padding: 8px;
-  border-radius: 5px;
-  border: none;
+#typing {
+  font-size: 13px;
+  color: #aaa;
+  height: 18px;
 }
-
-button {
-  padding: 8px 12px;
-  margin: 5px;
-  border-radius: 5px;
-  border: none;
-  }
