@@ -2,52 +2,64 @@
 <html>
 <head>
   <title>Friendly Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <h2>Friendly Chat 💬</h2>
-  <div class="status">Connecting...</div>
+  <div id="status">Connecting...</div>
 
-  <div class="chat-box" id="chat"></div>
+  <div id="chat"></div>
 
   <input type="text" id="msg" placeholder="Type message..." />
-  <button class="send">Send</button>
+  <button id="sendBtn">Send</button>
+
+  <button id="nextBtn">Next</button>
 
   <script src="/socket.io/socket.io.js"></script>
-
   <script>
     const socket = io();
 
-    const status = document.querySelector(".status");
-    const chatBox = document.querySelector(".chat-box");
-    const input = document.getElementById("msg");
-    const sendBtn = document.querySelector(".send");
+    const status = document.getElementById("status");
+    const chat = document.getElementById("chat");
+    const msgInput = document.getElementById("msg");
+    const sendBtn = document.getElementById("sendBtn");
+    const nextBtn = document.getElementById("nextBtn");
 
     socket.on("waiting", () => {
       status.innerText = "Looking for stranger...";
+      chat.innerHTML = "";
     });
 
     socket.on("matched", () => {
       status.innerText = "Connected to stranger";
-      chatBox.innerHTML = "";
+      chat.innerHTML = "";
     });
 
     socket.on("message", (msg) => {
       const div = document.createElement("div");
       div.innerText = "Stranger: " + msg;
-      chatBox.appendChild(div);
+      chat.appendChild(div);
+    });
+
+    socket.on("disconnected", () => {
+      status.innerText = "Stranger disconnected";
     });
 
     sendBtn.onclick = () => {
-      if (input.value !== "") {
+      if (msgInput.value.trim() !== "") {
         const div = document.createElement("div");
-        div.innerText = "Me: " + input.value;
-        chatBox.appendChild(div);
+        div.innerText = "Me: " + msgInput.value;
+        chat.appendChild(div);
 
-        socket.emit("message", input.value);
-        input.value = "";
+        socket.emit("message", msgInput.value);
+        msgInput.value = "";
       }
+    };
+
+    nextBtn.onclick = () => {
+      socket.emit("next");
     };
   </script>
 
